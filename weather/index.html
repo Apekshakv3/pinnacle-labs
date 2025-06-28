@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather Alerts</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      text-align: center;
+      padding-top: 50px;
+    }
+    input {
+      padding: 8px;
+      font-size: 16px;
+      margin-right: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+      background: #1890ff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #40a9ff;
+    }
+    .card {
+      display: inline-block;
+      text-align: left;
+      margin-top: 20px;
+      padding: 16px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .no-data {
+      margin-top: 20px;
+      font-style: italic;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h1>Weather Alerts</h1>
+  <input id="searchInput" type="text" placeholder="Enter city or location"/>
+  <button id="searchButton">Search</button>
+
+  <div id="result"></div>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const resultDiv = document.getElementById('result');
+
+    async function fetchWeather() {
+      const query = searchInput.value.trim();
+      if (!query) {
+        alert('Please enter a location.');
+        return;
+      }
+
+      const url = `https://weatherapi-com.p.rapidapi.com/forecast.json?q=${encodeURIComponent(query)}&days=3`;
+      const options = {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': '8fd4cc5935msh55369f10316779ap1845e9jsneaa2d2f9d6f8',
+          'x-rapidapi-host': 'weatherapi-com.p.rapidapi.com'
+        }
+      };
+
+      try {
+        const response = await fetch(url, options);
+        const data = await response.json();
+        console.log(data);
+
+        if (data && data.location) {
+          renderCard(data);
+        } else {
+          resultDiv.innerHTML = '<p class="no-data">No data found for this location.</p>';
+        }
+      } catch (error) {
+        console.error(error);
+        resultDiv.innerHTML = '<p class="no-data">Error fetching data.</p>';
+      }
+    }
+
+    function renderCard(data) {
+      resultDiv.innerHTML = `
+        <div class="card">
+          <p><strong>Country:</strong> ${data.location.country}</p>
+          <p><strong>Region:</strong> ${data.location.region}</p>
+          <p><strong>Latitude:</strong> ${data.location.lat}</p>
+          <p><strong>Longitude:</strong> ${data.location.lon}</p>
+          <p><strong>Local Time:</strong> ${data.location.localtime}</p>
+          <p><strong>Condition:</strong> ${data.current.condition.text}</p>
+          <img src="${data.current.condition.icon}" alt="Weather Icon"/>
+        </div>
+      `;
+    }
+
+    searchButton.addEventListener('click', fetchWeather);
+
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        fetchWeather();
+      }
+    });
+  </script>
+</body>
+</html>
